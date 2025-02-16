@@ -24,7 +24,8 @@
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
+            "Database\\Seeders\\": "database/seeders/",
+            "PEAR2\\Net\\RouterOS\\": "vendor/pear2/net_routeros/"
         }
     },
     "autoload-dev": {
