@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TicketResource\Pages;
 use App\Models\Ticket;
+use App\Services\MikroTikService;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
@@ -17,6 +18,7 @@ use Filament\Tables\Actions\ForceDeleteAction;
 use Filament\Tables\Actions\ForceDeleteBulkAction;
 use Filament\Tables\Actions\RestoreAction;
 use Filament\Tables\Actions\RestoreBulkAction;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Filters\SelectFilter;
@@ -98,10 +100,32 @@ class TicketResource extends Resource
                     ]),
             ])
             ->actions([
-                EditAction::make(),
-                DeleteAction::make(),
-                RestoreAction::make(),
-                ForceDeleteAction::make(),
+                EditAction::make()->button(),
+                DeleteAction::make()->button(),
+                RestoreAction::make()->button(),
+                ForceDeleteAction::make()->button(),
+                Action::make('disconnect')
+                    ->button()
+                    ->label('Disconnect User')
+                    ->action(function (Ticket $record) {
+                        if ($record->mikrotik_user) {
+                            $mikrotik = new MikroTikService();
+                            $result = $mikrotik->disconnectUser($record->mikrotik_user);
+
+                            if ($result) {
+                                Filament\Notifications\Notification::make()
+                                    ->title('User Disconnected')
+                                    ->success()
+                                    ->send();
+                            } else {
+                                Filament\Notifications\Notification::make()
+                                    ->title('Failed to Disconnect User')
+                                    ->danger()
+                                    ->send();
+                            }
+                        }
+                    })
+                    ->visible(fn ($record) => !empty($record->mikrotik_user)),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
